@@ -5,15 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plan de Estudios Interactivo - Farmacia UNER</title>
     <style>
+        /* Variables base para ambos temas */
         :root {
+            --primary: #004F39;
+            --primary-light: #ebfbee;
+        }
+
+        /* Variables del Tema Claro (Por defecto) */
+        .light-theme {
             --bg: #f8f9fa;
             --card-bg: #ffffff;
             --border: #e9ecef;
             --text-main: #151613;
             --text-muted: #6c757d;
-            --primary: #004F39;
             
-            /* Colores de los estados en Tema Claro */
             --status-none-bg: #f1f3f5;
             --status-none-txt: #495057;
             --status-current-bg: #e7f5ff;
@@ -24,6 +29,38 @@
             --status-approved-txt: #2b8a3e;
             --status-blocked-bg: #f8f9fa;
             --status-blocked-txt: #adb5bd;
+            
+            --panel-bg: #f8f9fa;
+            --switch-bg: #dee2e6;
+            --dropdown-bg: #ffffff;
+            --dropdown-border: #ced4da;
+            --shadow: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Variables del Tema Oscuro */
+        .dark-theme {
+            --bg: #11120f;
+            --card-bg: #161714;
+            --border: #262723;
+            --text-main: #FFFACA;
+            --text-muted: #888982;
+            
+            --status-none-bg: #22231f;
+            --status-none-txt: #888982;
+            --status-current-bg: #1c3242;
+            --status-current-txt: #6cb6ff;
+            --status-regular-bg: #3d3113;
+            --status-regular-txt: #e0ad24;
+            --status-approved-bg: #0d3a24;
+            --status-approved-txt: #4ade80;
+            --status-blocked-bg: #1a1b18;
+            --status-blocked-txt: #555651;
+            
+            --panel-bg: #161714;
+            --switch-bg: #333;
+            --dropdown-bg: #1c1d19;
+            --dropdown-border: #33342e;
+            --shadow: rgba(0, 0, 0, 0.5);
         }
 
         body {
@@ -35,16 +72,44 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
             width: 100%;
             max-width: 680px;
+            position: relative;
         }
 
         header {
             text-align: center;
             margin-bottom: 40px;
+            position: relative;
+        }
+
+        /* Botón Flotante del Selector de Tema */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px var(--shadow);
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--text-muted);
         }
 
         .brand {
@@ -111,17 +176,16 @@
             align-items: center;
             transition: all 0.2s;
             position: relative;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px var(--shadow);
         }
 
         .subject-row:hover {
-            border-color: #ced4da;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            border-color: var(--text-muted);
         }
 
         .subject-row.blocked {
             opacity: 0.5;
-            background-color: #e9ecef;
+            background-color: var(--status-blocked-bg);
             box-shadow: none;
         }
 
@@ -179,20 +243,20 @@
             transition: all 0.2s;
         }
 
-        .status-none { background: var(--status-none-bg); color: var(--status-none-txt); border-color: #dee2e6; }
+        .status-none { background: var(--status-none-bg); color: var(--status-none-txt); border-color: var(--border); }
         .status-current { background: var(--status-current-bg); color: var(--status-current-txt); }
         .status-regular { background: var(--status-regular-bg); color: var(--status-regular-txt); }
         .status-approved { background: var(--status-approved-bg); color: var(--status-approved-txt); }
-        .status-blocked { background: var(--status-blocked-bg); color: var(--status-blocked-txt); border-color: #dee2e6; cursor: not-allowed; }
+        .status-blocked { background: var(--status-blocked-bg); color: var(--status-blocked-txt); border-color: var(--border); cursor: not-allowed; }
 
         .dropdown-menu {
             position: absolute;
             right: 16px;
             top: 50px;
-            background: #ffffff;
-            border: 1px solid #ced4da;
+            background: var(--dropdown-bg);
+            border: 1px solid var(--dropdown-border);
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px var(--shadow);
             z-index: 10;
             display: none;
             overflow: hidden;
@@ -203,13 +267,12 @@
             padding: 8px 12px;
             font-size: 12px;
             cursor: pointer;
-            color: #495057;
+            color: var(--text-main);
             transition: background 0.15s;
         }
 
         .dropdown-item:hover {
-            background: #f1f3f5;
-            color: #000;
+            background: var(--status-none-bg);
         }
 
         .info-block {
@@ -218,7 +281,7 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px var(--shadow);
         }
 
         .info-title {
@@ -256,8 +319,8 @@
 
         .curr-tag {
             font-size: 11px;
-            color: #495057;
-            background: #f1f3f5;
+            color: var(--text-main);
+            background: var(--status-none-bg);
             padding: 2px 6px;
             border-radius: 4px;
         }
@@ -291,9 +354,9 @@
             stroke-linecap: round;
         }
 
-        .circle-bg { stroke: #e9ecef; }
+        .circle-bg { stroke: var(--border); }
         .circle-fill {
-            stroke: var(--primary);
+            stroke: var(--status-approved-txt);
             stroke-dasharray: 283;
             stroke-dashoffset: 283;
             transition: stroke-dashoffset 0.5s ease;
@@ -324,19 +387,19 @@
         .bar-track {
             flex-grow: 1;
             height: 6px;
-            background: #e9ecef;
+            background: var(--border);
             border-radius: 3px;
             margin: 0 15px;
             position: relative;
             overflow: hidden;
         }
 
-        .bar-fill { height: 100%; background: #2b8a3e; width: 0%; transition: width 0.3s; }
+        .bar-fill { height: 100%; background: var(--status-approved-txt); width: 0%; transition: width 0.3s; }
         .bar-count { font-size: 11px; color: var(--text-muted); width: 40px; text-align: right; }
 
         .dashboard-panel {
             margin-top: 25px;
-            background-color: #f8f9fa;
+            background-color: var(--panel-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 24px;
@@ -354,7 +417,7 @@
         .ref-dot { width: 10px; height: 10px; border-radius: 50%; }
 
         .requirements-box {
-            background: #f8f9fa;
+            background: var(--panel-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 16px;
@@ -375,7 +438,7 @@
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #dee2e6; transition: .3s; border-radius: 20px;
+            background-color: var(--switch-bg); transition: .3s; border-radius: 20px;
         }
         .slider:before {
             position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
@@ -389,13 +452,17 @@
             .dashboard-panel { grid-template-columns: repeat(2, 1fr); gap: 20px; }
             .stats-grid { flex-direction: column; align-items: center; }
             .bars-container { width: 100%; }
+            .theme-toggle-btn { position: relative; margin: 0 auto 20px auto; top: unset; right: unset; display: inline-flex; }
         }
     </style>
 </head>
-<body>
+<body class="light-theme">
 
     <div class="container">
         <header>
+            <div class="theme-toggle-btn" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span> <span id="theme-text">Oscuro</span>
+            </div>
             <div class="brand">Plande</div>
             <h1>Farmacia</h1>
             <div class="subtitle">Plan de Estudios 2026 — Facultad de Bromatología (UNER)</div>
@@ -470,17 +537,17 @@
 
         <div class="info-block">
             <div class="info-title">Requisitos Especiales Obligatorios</div>
-            <p class="info-desc">Según las normas reglamentarias del Plan, antes de comenzar el tercer año se deben acreditar estas suficiencias.</p>
+            <p class="info-desc">Según las normas reglamentarias del Plan [cite: 328], antes de comenzar el tercer año se deben acreditar estas suficiencias[cite: 328].</p>
             <div class="requirements-box">
                 <div class="req-toggle-item">
-                    <span>Examen de suficiencia en Idioma Inglés</span>
+                    <span>Examen de suficiencia en Idioma Inglés [cite: 328]</span>
                     <label class="switch">
                         <input type="checkbox" id="chk-ing" onchange="saveRequirementsToStorage(); updateEngine();">
                         <span class="slider"></span>
                     </label>
                 </div>
                 <div class="req-toggle-item">
-                    <span>Examen de suficiencia en Herramientas Informáticas</span>
+                    <span>Examen de suficiencia en Herramientas Informáticas [cite: 328]</span>
                     <label class="switch">
                         <input type="checkbox" id="chk-inf" onchange="saveRequirementsToStorage(); updateEngine();">
                         <span class="slider"></span>
@@ -516,7 +583,7 @@
                 year: "1er Año",
                 terms: [
                     {
-                        name: "Primer cuatrimestre",
+                        name: "Primer cuatrimestre [cite: 317]",
                         subjects: [
                             { id: "1.1.1", name: "Taller de Introducción a las Ciencias Farmacéuticas", hrs: 150, cre: 6, reqApproved: [], reqRegular: [] },
                             { id: "1.2.1", name: "Matemática", hrs: 225, cre: 9, reqApproved: [], reqRegular: [] },
@@ -524,7 +591,7 @@
                         ]
                     },
                     {
-                        name: "Segundo cuatrimestre",
+                        name: "Segundo cuatrimestre [cite: 317]",
                         subjects: [
                             { id: "1.4.2", name: "Biología", hrs: 300, cre: 12, reqApproved: [], reqRegular: [] },
                             { id: "1.5.2", name: "Química Orgánica I", hrs: 300, cre: 12, reqApproved: [], reqRegular: ["1.3.1"] },
@@ -537,7 +604,7 @@
                 year: "2do Año",
                 terms: [
                     {
-                        name: "Primer cuatrimestre",
+                        name: "Primer cuatrimestre [cite: 317]",
                         subjects: [
                             { id: "2.7.1", name: "Anatomía e Histología", hrs: 200, cre: 8, reqApproved: [], reqRegular: ["1.4.2"] },
                             { id: "2.8.1", name: "Química Orgánica II", hrs: 250, cre: 10, reqApproved: ["1.3.1"], reqRegular: ["1.5.2"] },
@@ -545,7 +612,7 @@
                         ]
                     },
                     {
-                        name: "Segundo cuatrimestre",
+                        name: "Segundo cuatrimestre [cite: 317]",
                         subjects: [
                             { id: "2.10.2", name: "Bioquímica Estructural", hrs: 250, cre: 10, reqApproved: ["1.5.2"], reqRegular: ["2.8.1"] },
                             { id: "2.11.2", name: "Química Analítica", hrs: 275, cre: 11, reqApproved: [], reqRegular: ["1.3.1"] },
@@ -559,7 +626,7 @@
                 year: "3er Año",
                 terms: [
                     {
-                        name: "Primer cuatrimestre",
+                        name: "Primer cuatrimestre [cite: 317]",
                         subjects: [
                             { id: "3.14.1", name: "Química Analítica Instrumental", hrs: 225, cre: 9, reqApproved: ["1.3.1", "1.6.2"], reqRegular: ["2.11.2", "2.9.1"] },
                             { id: "3.15.1", name: "Fisiología e Inmunología", hrs: 250, cre: 10, reqApproved: ["1.4.2"], reqRegular: ["2.7.1"] },
@@ -567,13 +634,12 @@
                         ]
                     },
                     {
-                        name: "Segundo cuatrimestre",
+                        name: "Segundo cuatrimestre [cite: 317]",
                         subjects: [
                             { id: "3.17.2", name: "Genética y Biotecnología Aplicada", hrs: 200, cre: 8, reqApproved: ["2.8.1"], reqRegular: ["2.10.2"] },
-                            { id: "3.17.2", name: "Genética y Biotecnología Aplicada [cite: 235, 273, 317]", hrs: 200, cre: 8, reqApproved: ["2.8.1"], reqRegular: ["2.10.2"] },
                             { id: "3.18.2", name: "Microbiología General", hrs: 225, cre: 9, reqApproved: ["2.8.1"], reqRegular: ["2.10.2"] },
                             { id: "3.19.2", name: "Fisiopatología", hrs: 250, cre: 10, reqApproved: ["2.7.1"], reqRegular: ["3.15.1"] },
-                            { id: "CL.3", name: "Créditos Libres (Bloque 3er Año)", hrs: 125, cre: 5, reqApproved: [], reqRegular: [] }
+                            { id: "CL.3", name: "Créditos Libres (Bloque 3er Año) [cite: 317]", hrs: 125, cre: 5, reqApproved: [], reqRegular: [] }
                         ]
                     }
                 ]
@@ -582,22 +648,22 @@
                 year: "4to Año",
                 terms: [
                     {
-                        name: "Primer cuatrimestre",
+                        name: "Primer cuatrimestre [cite: 317]",
                         subjects: [
                             { id: "4.20.1", name: "Farmacología I", hrs: 225, cre: 9, reqApproved: ["3.15.1"], reqRegular: ["3.19.2", "3.16.1"] },
                             { id: "4.21.1", name: "Tecnología Farmacéutica I", hrs: 225, cre: 9, reqApproved: ["2.9.1"], reqRegular: ["2.11.2"] },
-                            { id: "4.22.1", name: "Nutrición y Bromatología", hrs: 100, cre: 4, reqApproved: ["2.10.2"], reqRegular: ["3.16.1"] },
+                            { id: "4.22.1", name: "Nutrición y Bromatología", hrs: 100, cre: 4, reqApproved: ["3.16.1"], reqRegular: [] },
                             { id: "4.23.1", name: "Farmacología Vegetal y Fitoterapia", hrs: 100, cre: 4, reqApproved: [], reqRegular: ["1.4.2"] }
                         ]
                     },
                     {
-                        name: "Segundo cuatrimestre",
+                        name: "Segundo cuatrimestre [cite: 327]",
                         subjects: [
                             { id: "4.24.2", name: "Farmacología II", hrs: 225, cre: 9, reqApproved: ["3.16.1"], reqRegular: ["4.20.1"] },
                             { id: "4.25.2", name: "Tecnología Farmacéutica II", hrs: 225, cre: 9, reqApproved: ["2.11.2"], reqRegular: ["4.21.1"] },
                             { id: "4.26.2", name: "Control de Calidad de Medicamentos", hrs: 175, cre: 7, reqApproved: ["2.11.2", "2.9.1"], reqRegular: ["3.14.1", "4.21.1"] },
-                            { id: "4.27.2", name: "Elementos de Toxicología", hrs: 100, cre: 4, reqApproved: ["2.10.2"], reqRegular: ["3.16.1"] },
-                            { id: "CL.4", name: "Créditos Libres (Bloque 4to Año)", hrs: 125, cre: 5, reqApproved: [], reqRegular: [] }
+                            { id: "4.27.2", name: "Elementos de Toxicología", hrs: 100, cre: 4, reqApproved: ["3.16.1"], reqRegular: [] },
+                            { id: "CL.4", name: "Créditos Libres (Bloque 4to Año) [cite: 327]", hrs: 125, cre: 5, reqApproved: [], reqRegular: [] }
                         ]
                     }
                 ]
@@ -606,7 +672,7 @@
                 year: "5to Año",
                 terms: [
                     {
-                        name: "Primer cuatrimestre",
+                        name: "Primer cuatrimestre [cite: 327]",
                         subjects: [
                             { id: "5.28.1", name: "Economía y Legislación Farmacéutica", hrs: 100, cre: 4, reqApproved: [], reqRegular: ["1.1.1"] },
                             { id: "5.29.1", name: "Productos Médicos y Esterilización", hrs: 100, cre: 4, reqApproved: ["3.18.2"], reqRegular: ["4.21.1"] },
@@ -623,10 +689,35 @@
         const stateLabels = { none: "No cursada", current: "En curso", regular: "Regular", approved: "Aprobada", blocked: "Bloqueada 🔒" };
         let flatSubjects = [];
 
+        // Inicializar el gestor de temas dinámico
+        function initTheme() {
+            const savedTheme = localStorage.getItem("farmacia_uner_theme") || "light";
+            document.body.className = savedTheme === "light" ? "light-theme" : "dark-theme";
+            updateThemeUI(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.body.classList.contains("light-theme") ? "light" : "dark";
+            const nextTheme = currentTheme === "light" ? "dark" : "light";
+            document.body.className = nextTheme === "light" ? "light-theme" : "dark-theme";
+            localStorage.setItem("farmacia_uner_theme", nextTheme);
+            updateThemeUI(nextTheme);
+        }
+
+        function updateThemeUI(theme) {
+            const icon = document.getElementById("theme-icon");
+            const text = document.getElementById("theme-text");
+            if (theme === "light") {
+                icon.innerText = "🌙";
+                text.innerText = "Oscuro";
+            } else {
+                icon.innerText = "☀️";
+                text.innerText = "Claro";
+            }
+        }
+
         function initData() {
             flatSubjects = [];
-            
-            // Intentar recuperar progreso guardado localmente
             const savedProgress = localStorage.getItem("farmacia_uner_progress");
             if (savedProgress) {
                 userProgress = JSON.parse(savedProgress);
@@ -641,12 +732,8 @@
                 });
             });
 
-            // Recuperar requerimientos especiales guardados localmente
-            const savedReqIng = localStorage.getItem("farmacia_uner_req_ing");
-            const savedReqInf = localStorage.getItem("farmacia_uner_req_inf");
-            
-            if (savedReqIng === "true") document.getElementById("chk-ing").checked = true;
-            if (savedReqInf === "true") document.getElementById("chk-inf").checked = true;
+            if (localStorage.getItem("farmacia_uner_req_ing") === "true") document.getElementById("chk-ing").checked = true;
+            if (localStorage.getItem("farmacia_uner_req_inf") === "true") document.getElementById("chk-inf").checked = true;
         }
 
         function saveRequirementsToStorage() {
@@ -720,10 +807,7 @@
 
         function setSubjectStatus(id, status) {
             userProgress[id] = status;
-            
-            // Guardar el estado actualizado en el almacenamiento local
             localStorage.setItem("farmacia_uner_progress", JSON.stringify(userProgress));
-            
             updateEngine();
         }
 
@@ -752,7 +836,6 @@
                     }
                 });
 
-                // Restricción reglamentaria de tercer año [cite: 328]
                 if (sub.yearIndex >= 2 && (!ingAprobado || !infAprobado)) {
                     bloqueada = true;
                     if (!ingAprobado) motivos.push("Suficiencia de Inglés");
@@ -777,9 +860,7 @@
                 }
             });
 
-            // Persistir de nuevo por si se limpiaron estados huérfanos bloqueados
             localStorage.setItem("farmacia_uner_progress", JSON.stringify(userProgress));
-
             calculateMetrics();
         }
 
@@ -856,6 +937,8 @@
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.style.display = 'none');
         });
 
+        // Secuencia lógica de arranque
+        initTheme();
         initData();
         renderPlan();
         updateEngine();
