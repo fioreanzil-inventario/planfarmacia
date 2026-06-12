@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Estudios Interactivo - Farmacia UNER</title>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --border: #e9ecef;
+            --text-main: #151613;
+            --text-muted: #6c757d;
+            --primary: #004F39;
+            
+            /* Colores de los estados en Tema Claro */
+            --status-none-bg: #f1f3f5;
+            --status-none-txt: #495057;
+            --status-current-bg: #e7f5ff;
+            --status-current-txt: #1c7ed6;
+            --status-regular-bg: #fff9db;
+            --status-regular-txt: #f59f00;
+            --status-approved-bg: #ebfbee;
+            --status-approved-txt: #2b8a3e;
+            --status-blocked-bg: #f8f9fa;
+            --status-blocked-txt: #adb5bd;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .brand {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: var(--text-main);
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .year-section {
+            margin-bottom: 35px;
+        }
+
+        .year-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .year-badge {
+            font-size: 11px;
+            background: var(--status-approved-bg);
+            color: var(--status-approved-txt);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .term-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 0 10px 0;
+        }
+
+        .subject-row {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .subject-row:hover {
+            border-color: #ced4da;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+
+        .subject-row.blocked {
+            opacity: 0.5;
+            background-color: #e9ecef;
+            box-shadow: none;
+        }
+
+        .subject-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-grow: 1;
+        }
+
+        .chevron {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .subject-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .lock-hint {
+            font-size: 11px;
+            color: #e03131;
+            margin-top: 3px;
+            display: none;
+        }
+
+        .subject-row.blocked .lock-hint {
+            display: block;
+        }
+
+        .subject-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .subject-hours {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .status-button {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            min-width: 90px;
+            text-align: center;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .status-none { background: var(--status-none-bg); color: var(--status-none-txt); border-color: #dee2e6; }
+        .status-current { background: var(--status-current-bg); color: var(--status-current-txt); }
+        .status-regular { background: var(--status-regular-bg); color: var(--status-regular-txt); }
+        .status-approved { background: var(--status-approved-bg); color: var(--status-approved-txt); }
+        .status-blocked { background: var(--status-blocked-bg); color: var(--status-blocked-txt); border-color: #dee2e6; cursor: not-allowed; }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 16px;
+            top: 50px;
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10;
+            display: none;
+            overflow: hidden;
+            width: 130px;
+        }
+
+        .dropdown-item {
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #495057;
+            transition: background 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: #f1f3f5;
+            color: #000;
+        }
+
+        .info-block {
+            margin-top: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+
+        .info-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .curriculum-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .curriculum-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .curriculum-item:last-child {
+            border-bottom: none;
+        }
+
+        .curr-tag {
+            font-size: 11px;
+            color: #495057;
+            background: #f1f3f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .progress-circle-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-circle-container svg {
+            width: 100px;
+            height: 100px;
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle-container circle {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .circle-bg { stroke: #e9ecef; }
+        .circle-fill {
+            stroke: var(--primary);
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .circle-percentage {
+            position: absolute;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .bars-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .bar-lbl { width: 60px; color: var(--text-main); font-weight: 500; }
+        .bar-track {
+            flex-grow: 1;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 0 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill { height: 100%; background: #2b8a3e; width: 0%; transition: width 0.3s; }
+        .bar-count { font-size: 11px; color: var(--text-muted); width: 40px; text-align: right; }
+
+        .dashboard-panel {
+            margin-top: 25px;
+            background-color: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            text-align: center;
+        }
+
+        .dash-box { display: flex; flex-direction: column; gap: 4px; }
+        .dash-val { font-size: 24px; font-weight: 700; color: var(--text-main); }
+        .dash-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .ref-row { display: flex; align-items: center; gap: 10px; font-size: 13px; margin-bottom: 12px; }
+        .ref-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .requirements-box {
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 15px;
+        }
+
+        .req-toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .req-toggle-item:last-child { border-bottom: none; }
+        .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #dee2e6; transition: .3s; border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background-color: white; transition: .3s; border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(14px); }
+
+        @media (max-width: 600px) {
+            .dashboard-panel { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .stats-grid { flex-direction: column; align-items: center; }
+            .bars-container { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="brand">Plande</div>
+            <h1>Farmacia</h1>
+            <div class="subtitle">Plan de Estudios 2026 — Facultad de Bromatología (UNER)</div>
+        </header>
+
+        <div id="plan-content"></div>
+
+        <div class="info-block">
+            <div class="info-title">Qué podés cursar</div>
+            <p class="info-desc">En tu situación actual, estas son las materias que podés cursar. El número junto al nombre indica cuántas materias desbloquea.</p>
+            <ul class="curriculum-list" id="can-study-list"></ul>
+        </div>
+
+        <div class="info-block">
+            <div class="info-title">Estadísticas</div>
+            <div class="stats-grid">
+                <div class="progress-circle-container">
+                    <svg>
+                        <circle class="circle-bg" cx="50" cy="50" r="45"></circle>
+                        <circle class="circle-fill" id="progress-circle" cx="50" cy="50" r="45"></circle>
+                    </svg>
+                    <div class="circle-percentage" id="circle-text">0%</div>
+                </div>
+                <div class="bars-container">
+                    <div class="bar-row">
+                        <span class="bar-lbl">1er Año</span>
+                        <div class="bar-track"><div class="bar-fill" id="bar-y0"></div></div>
+                        <span class="bar-count" id="count-y0">0 de 6</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-lbl">2do Año</span>
+                        <div class="bar-track"><div class="bar-fill" id="bar-y1"></div></div>
+                        <span class="bar-count" id="count-y1">0 de 7</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-lbl">3er Año</span>
+                        <div class="bar-track"><div class="bar-fill" id="bar-y2"></div></div>
+                        <span class="bar-count" id="count-y2">0 de 7</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-lbl">4to Año</span>
+                        <div class="bar-track"><div class="bar-fill" id="bar-y3"></div></div>
+                        <span class="bar-count" id="count-y3">0 de 9</span>
+                    </div>
+                    <div class="bar-row">
+                        <span class="bar-lbl">5to Año</span>
+                        <div class="bar-track"><div class="bar-fill" id="bar-y4"></div></div>
+                        <span class="bar-count" id="count-y4">0 de 5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div class="dash-box">
+                    <div class="dash-val" id="dash-subjects">0 / 34</div>
+                    <div class="dash-lbl">Materias</div>
+                </div>
+                <div class="dash-box">
+                    <div class="dash-val" id="dash-credits">0 / 270</div>
+                    <div class="dash-lbl">Créditos</div>
+                </div>
+                <div class="dash-box">
+                    <div class="dash-val" id="dash-hours">0 / 3.165</div>
+                    <div class="dash-lbl">Horas</div>
+                </div>
+                <div class="dash-box">
+                    <div class="dash-val" id="dash-progress">0%</div>
+                    <div class="dash-lbl">Progreso</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-block">
+            <div class="info-title">Requisitos Especiales Obligatorios</div>
+            <p class="info-desc">Según las normas reglamentarias del Plan, antes de comenzar el tercer año se deben acreditar estas suficiencias.</p>
+            <div class="requirements-box">
+                <div class="req-toggle-item">
+                    <span>Examen de suficiencia en Idioma Inglés</span>
+                    <label class="switch">
+                        <input type="checkbox" id="chk-ing" onchange="saveRequirementsToStorage(); updateEngine();">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="req-toggle-item">
+                    <span>Examen de suficiencia en Herramientas Informáticas</span>
+                    <label class="switch">
+                        <input type="checkbox" id="chk-inf" onchange="saveRequirementsToStorage(); updateEngine();">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-block">
+            <div class="info-title">Referencias</div>
+            <div class="ref-row">
+                <div class="ref-dot" style="background: var(--status-none-txt)"></div>
+                <span><strong>No cursada:</strong> Aún no has asistido a sus clases o no la has regularizado.</span>
+            </div>
+            <div class="ref-row">
+                <div class="ref-dot" style="background: var(--status-current-txt)"></div>
+                <span><strong>En curso:</strong> Estás asistiendo a las clases de la asignatura este cuatrimestre.</span>
+            </div>
+            <div class="ref-row">
+                <div class="ref-dot" style="background: var(--status-regular-txt)"></div>
+                <span><strong>Regular:</strong> Aprobaste la cursada práctica pero aún debés rendir su examen final.</span>
+            </div>
+            <div class="ref-row">
+                <div class="ref-dot" style="background: var(--status-approved-txt)"></div>
+                <span><strong>Aprobada:</strong> Ya la cursaste, rendiste y aprobaste el examen final.</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const planData = [
+            {
+                year: "1er Año",
+                terms: [
+                    {
+                        name: "Primer cuatrimestre",
+                        subjects: [
+                            { id: "1.1.1", name: "Taller de Introducción a las Ciencias Farmacéuticas", hrs: 150, cre: 6, reqApproved: [], reqRegular: [] },
+                            { id: "1.2.1", name: "Matemática", hrs: 225, cre: 9, reqApproved: [], reqRegular: [] },
+                            { id: "1.3.1", name: "Química General e Inorgánica", hrs: 275, cre: 11, reqApproved: [], reqRegular: [] }
+                        ]
+                    },
+                    {
+                        name: "Segundo cuatrimestre",
+                        subjects: [
+                            { id: "1.4.2", name: "Biología", hrs: 300, cre: 12, reqApproved: [], reqRegular: [] },
+                            { id: "1.5.2", name: "Química Orgánica I", hrs: 300, cre: 12, reqApproved: [], reqRegular: ["1.3.1"] },
+                            { id: "1.6.2", name: "Física", hrs: 250, cre: 10, reqApproved: [], reqRegular: ["1.2.1"] }
+                        ]
+                    }
+                ]
+            },
+            {
+                year: "2do Año",
+                terms: [
+                    {
+                        name: "Primer cuatrimestre",
+                        subjects: [
+                            { id: "2.7.1", name: "Anatomía e Histología", hrs: 200, cre: 8, reqApproved: [], reqRegular: ["1.4.2"] },
+                            { id: "2.8.1", name: "Química Orgánica II", hrs: 250, cre: 10, reqApproved: ["1.3.1"], reqRegular: ["1.5.2"] },
+                            { id: "2.9.1", name: "Fisicoquímica", hrs: 225, cre: 9, reqApproved: ["1.2.1"], reqRegular: ["1.3.1", "1.6.2"] }
+                        ]
+                    },
+                    {
+                        name: "Segundo cuatrimestre",
+                        subjects: [
+                            { id: "2.10.2", name: "Bioquímica Estructural", hrs: 250, cre: 10, reqApproved: ["1.5.2"], reqRegular: ["2.8.1"] },
+                            { id: "2.11.2", name: "Química Analítica", hrs: 275, cre: 11, reqApproved: [], reqRegular: ["1.3.1"] },
+                            { id: "2.12.2", name: "Bioestadística Aplicada al Diseño de Experimentos", hrs: 150, cre: 6, reqApproved: [], reqRegular: ["1.2.1"] },
+                            { id: "2.13.2", name: "Taller Integrador para la Intervención Profesional", hrs: 150, cre: 6, reqApproved: [], reqRegular: ["1.1.1"] }
+                        ]
+                    }
+                ]
+            },
+            {
+                year: "3er Año",
+                terms: [
+                    {
+                        name: "Primer cuatrimestre",
+                        subjects: [
+                            { id: "3.14.1", name: "Química Analítica Instrumental", hrs: 225, cre: 9, reqApproved: ["1.3.1", "1.6.2"], reqRegular: ["2.11.2", "2.9.1"] },
+                            { id: "3.15.1", name: "Fisiología e Inmunología", hrs: 250, cre: 10, reqApproved: ["1.4.2"], reqRegular: ["2.7.1"] },
+                            { id: "3.16.1", name: "Bioquímica Metabólica", hrs: 225, cre: 9, reqApproved: ["2.8.1"], reqRegular: ["2.10.2"] }
+                        ]
+                    },
+                    {
+                        name: "Segundo cuatrimestre",
+                        subjects: [
+                            { id: "3.17.2", name: "Genética y Biotecnología Aplicada", hrs: 200, cre: 8, reqApproved: ["2.8.1"], reqRegular: ["2.10.2"] },
+                            { id: "3.17.2", name: "Genética y Biotecnología Aplicada [cite: 235, 273, 317]", hrs: 200, cre: 8, reqApproved: ["2.8.1"], reqRegular: ["2.10.2"] },
+                            { id: "3.18.2", name: "Microbiología General", hrs: 225, cre: 9, reqApproved: ["2.8.1"], reqRegular: ["2.10.2"] },
+                            { id: "3.19.2", name: "Fisiopatología", hrs: 250, cre: 10, reqApproved: ["2.7.1"], reqRegular: ["3.15.1"] },
+                            { id: "CL.3", name: "Créditos Libres (Bloque 3er Año)", hrs: 125, cre: 5, reqApproved: [], reqRegular: [] }
+                        ]
+                    }
+                ]
+            },
+            {
+                year: "4to Año",
+                terms: [
+                    {
+                        name: "Primer cuatrimestre",
+                        subjects: [
+                            { id: "4.20.1", name: "Farmacología I", hrs: 225, cre: 9, reqApproved: ["3.15.1"], reqRegular: ["3.19.2", "3.16.1"] },
+                            { id: "4.21.1", name: "Tecnología Farmacéutica I", hrs: 225, cre: 9, reqApproved: ["2.9.1"], reqRegular: ["2.11.2"] },
+                            { id: "4.22.1", name: "Nutrición y Bromatología", hrs: 100, cre: 4, reqApproved: ["2.10.2"], reqRegular: ["3.16.1"] },
+                            { id: "4.23.1", name: "Farmacología Vegetal y Fitoterapia", hrs: 100, cre: 4, reqApproved: [], reqRegular: ["1.4.2"] }
+                        ]
+                    },
+                    {
+                        name: "Segundo cuatrimestre",
+                        subjects: [
+                            { id: "4.24.2", name: "Farmacología II", hrs: 225, cre: 9, reqApproved: ["3.16.1"], reqRegular: ["4.20.1"] },
+                            { id: "4.25.2", name: "Tecnología Farmacéutica II", hrs: 225, cre: 9, reqApproved: ["2.11.2"], reqRegular: ["4.21.1"] },
+                            { id: "4.26.2", name: "Control de Calidad de Medicamentos", hrs: 175, cre: 7, reqApproved: ["2.11.2", "2.9.1"], reqRegular: ["3.14.1", "4.21.1"] },
+                            { id: "4.27.2", name: "Elementos de Toxicología", hrs: 100, cre: 4, reqApproved: ["2.10.2"], reqRegular: ["3.16.1"] },
+                            { id: "CL.4", name: "Créditos Libres (Bloque 4to Año)", hrs: 125, cre: 5, reqApproved: [], reqRegular: [] }
+                        ]
+                    }
+                ]
+            },
+            {
+                year: "5to Año",
+                terms: [
+                    {
+                        name: "Primer cuatrimestre",
+                        subjects: [
+                            { id: "5.28.1", name: "Economía y Legislación Farmacéutica", hrs: 100, cre: 4, reqApproved: [], reqRegular: ["1.1.1"] },
+                            { id: "5.29.1", name: "Productos Médicos y Esterilización", hrs: 100, cre: 4, reqApproved: ["3.18.2"], reqRegular: ["4.21.1"] },
+                            { id: "5.30.1", name: "Salud Comunitaria y Farmacia", hrs: 125, cre: 5, reqApproved: ["1.1.1"], reqRegular: ["2.13.2", "3.18.2"] },
+                            { id: "5.31.1", name: "Farmacia Clínica y Hospitalaria", hrs: 125, cre: 5, reqApproved: ["4.20.1"], reqRegular: ["4.24.2"] },
+                            { id: "5.32.1", name: "Práctica Profesional Supervisada", hrs: 300, cre: 12, reqApproved: ["4.20.1", "4.21.1"], reqRegular: ["4.24.2", "4.25.2", "4.26.2"] }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        let userProgress = {};
+        const stateLabels = { none: "No cursada", current: "En curso", regular: "Regular", approved: "Aprobada", blocked: "Bloqueada 🔒" };
+        let flatSubjects = [];
+
+        function initData() {
+            flatSubjects = [];
+            
+            // Intentar recuperar progreso guardado localmente
+            const savedProgress = localStorage.getItem("farmacia_uner_progress");
+            if (savedProgress) {
+                userProgress = JSON.parse(savedProgress);
+            }
+
+            planData.forEach((yearBlock, yIdx) => {
+                yearBlock.terms.forEach(term => {
+                    term.subjects.forEach(subject => {
+                        flatSubjects.push({ ...subject, yearIndex: yIdx });
+                        if (!userProgress[subject.id]) userProgress[subject.id] = "none";
+                    });
+                });
+            });
+
+            // Recuperar requerimientos especiales guardados localmente
+            const savedReqIng = localStorage.getItem("farmacia_uner_req_ing");
+            const savedReqInf = localStorage.getItem("farmacia_uner_req_inf");
+            
+            if (savedReqIng === "true") document.getElementById("chk-ing").checked = true;
+            if (savedReqInf === "true") document.getElementById("chk-inf").checked = true;
+        }
+
+        function saveRequirementsToStorage() {
+            localStorage.setItem("farmacia_uner_req_ing", document.getElementById("chk-ing").checked);
+            localStorage.setItem("farmacia_uner_req_inf", document.getElementById("chk-inf").checked);
+        }
+
+        function renderPlan() {
+            const container = document.getElementById("plan-content");
+            container.innerHTML = "";
+
+            planData.forEach((yearBlock, yIdx) => {
+                const yearDiv = document.createElement("div");
+                yearDiv.className = "year-section";
+
+                const yearHeader = document.createElement("div");
+                yearHeader.className = "year-title";
+                yearHeader.innerHTML = `<span>${yearBlock.year}</span> <span class="year-badge" id="badge-year-${yIdx}">Aprobado</span>`;
+                yearDiv.appendChild(yearHeader);
+
+                yearBlock.terms.forEach(term => {
+                    const termTitle = document.createElement("div");
+                    termTitle.className = "term-title";
+                    termTitle.innerText = term.name;
+                    yearDiv.appendChild(termTitle);
+
+                    term.subjects.forEach(subject => {
+                        const row = document.createElement("div");
+                        row.className = "subject-row";
+                        row.id = `row-${subject.id}`;
+
+                        row.innerHTML = `
+                            <div class="subject-info">
+                                <span class="chevron">▼</span>
+                                <div>
+                                    <div class="subject-name">${subject.name}</div>
+                                    <div class="lock-hint" id="lock-hint-${subject.id}">Faltan correlativas previas</div>
+                                </div>
+                            </div>
+                            <div class="subject-right">
+                                <span class="subject-hours">${subject.hrs} hs</span>
+                                <div class="status-button status-none" id="btn-${subject.id}" onclick="toggleDropdown(event, '${subject.id}')">
+                                    No cursada
+                                </div>
+                                <div class="dropdown-menu" id="drop-${subject.id}">
+                                    <div class="dropdown-item" onclick="setSubjectStatus('${subject.id}', 'none')">No cursada</div>
+                                    <div class="dropdown-item" onclick="setSubjectStatus('${subject.id}', 'current')">En curso</div>
+                                    <div class="dropdown-item" onclick="setSubjectStatus('${subject.id}', 'regular')">Regular</div>
+                                    <div class="dropdown-item" onclick="setSubjectStatus('${subject.id}', 'approved')">Aprobada</div>
+                                </div>
+                            </div>
+                        `;
+                        yearDiv.appendChild(row);
+                    });
+                });
+                container.appendChild(yearDiv);
+            });
+        }
+
+        function toggleDropdown(event, id) {
+            event.stopPropagation();
+            const row = document.getElementById(`row-${id}`);
+            if (row.classList.contains("blocked")) return;
+
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if (menu.id !== `drop-${id}`) menu.style.display = 'none';
+            });
+            const menu = document.getElementById(`drop-${id}`);
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function setSubjectStatus(id, status) {
+            userProgress[id] = status;
+            
+            // Guardar el estado actualizado en el almacenamiento local
+            localStorage.setItem("farmacia_uner_progress", JSON.stringify(userProgress));
+            
+            updateEngine();
+        }
+
+        function updateEngine() {
+            const ingAprobado = document.getElementById("chk-ing").checked;
+            const infAprobado = document.getElementById("chk-inf").checked;
+
+            flatSubjects.forEach(sub => {
+                let bloqueada = false;
+                let motivos = [];
+
+                sub.reqApproved.forEach(reqId => {
+                    if (userProgress[reqId] !== "approved") {
+                        bloqueada = true;
+                        const reqSub = flatSubjects.find(f => f.id === reqId);
+                        motivos.push(`${reqSub.name} (Aprobada)`);
+                    }
+                });
+
+                sub.reqRegular.forEach(reqId => {
+                    const status = userProgress[reqId];
+                    if (status !== "regular" && status !== "approved") {
+                        bloqueada = true;
+                        const reqSub = flatSubjects.find(f => f.id === reqId);
+                        motivos.push(`${reqSub.name} (Regular)`);
+                    }
+                });
+
+                // Restricción reglamentaria de tercer año [cite: 328]
+                if (sub.yearIndex >= 2 && (!ingAprobado || !infAprobado)) {
+                    bloqueada = true;
+                    if (!ingAprobado) motivos.push("Suficiencia de Inglés");
+                    if (!infAprobado) motivos.push("Suficiencia de Informática");
+                }
+
+                const row = document.getElementById(`row-${sub.id}`);
+                const btn = document.getElementById(`btn-${sub.id}`);
+                const hint = document.getElementById(`lock-hint-${sub.id}`);
+
+                if (bloqueada) {
+                    userProgress[sub.id] = "none";
+                    row.classList.add("blocked");
+                    btn.className = "status-button status-blocked";
+                    btn.innerText = stateLabels["blocked"];
+                    hint.innerText = `Requisitos pendientes: ${motivos.join(", ")}`;
+                } else {
+                    row.classList.remove("blocked");
+                    const currentStatus = userProgress[sub.id];
+                    btn.className = `status-button status-${currentStatus}`;
+                    btn.innerText = stateLabels[currentStatus];
+                }
+            });
+
+            // Persistir de nuevo por si se limpiaron estados huérfanos bloqueados
+            localStorage.setItem("farmacia_uner_progress", JSON.stringify(userProgress));
+
+            calculateMetrics();
+        }
+
+        function calculateMetrics() {
+            let approvedCount = 0;
+            let totalCredits = 0;
+            let totalHours = 0;
+            const yearApprovedCounts = [0, 0, 0, 0, 0];
+            const yearTotalCounts = [0, 0, 0, 0, 0];
+
+            flatSubjects.forEach(subject => {
+                const yIdx = subject.yearIndex;
+                yearTotalCounts[yIdx]++;
+
+                if (userProgress[subject.id] === "approved") {
+                    approvedCount++;
+                    totalCredits += subject.cre;
+                    totalHours += subject.hrs;
+                    yearApprovedCounts[yIdx]++;
+                }
+            });
+
+            yearApprovedCounts.forEach((count, idx) => {
+                const badge = document.getElementById(`badge-year-${idx}`);
+                if (badge) badge.style.display = (count === yearTotalCounts[idx]) ? "inline-block" : "none";
+                
+                const fill = document.getElementById(`bar-y${idx}`);
+                const txt = document.getElementById(`count-y${idx}`);
+                if (fill && txt) {
+                    const pct = (count / yearTotalCounts[idx]) * 100;
+                    fill.style.width = `${pct}%`;
+                    txt.innerText = `${count} de ${yearTotalCounts[idx]}`;
+                }
+            });
+
+            document.getElementById("dash-subjects").innerText = `${approvedCount} / ${flatSubjects.length}`;
+            document.getElementById("dash-credits").innerText = `${totalCredits} / 270`;
+            document.getElementById("dash-hours").innerText = `${totalHours.toLocaleString()} / 3.165`;
+            
+            const progressPercent = Math.round((totalCredits / 270) * 100);
+            document.getElementById("dash-progress").innerText = `${progressPercent}%`;
+            document.getElementById("circle-text").innerText = `${progressPercent}%`;
+
+            const strokeOffset = 283 - (283 * progressPercent) / 100;
+            document.getElementById("progress-circle").style.strokeDashoffset = strokeOffset;
+
+            const canStudyList = document.getElementById("can-study-list");
+            canStudyList.innerHTML = "";
+
+            flatSubjects.forEach(sub => {
+                const row = document.getElementById(`row-${sub.id}`);
+                if (userProgress[sub.id] === "approved" || row.classList.contains("blocked")) return;
+
+                let desbloqueaCount = 0;
+                flatSubjects.forEach(other => {
+                    if (other.reqApproved.includes(sub.id) || other.reqRegular.includes(sub.id)) desbloqueaCount++;
+                });
+
+                const li = document.createElement("li");
+                li.className = "curriculum-item";
+                li.innerHTML = `
+                    <span>${sub.name} <small style="color: var(--text-muted)">(${planData[sub.yearIndex].year})</small></span>
+                    <span class="curr-tag">${desbloqueaCount} desbloquea</span>
+                `;
+                canStudyList.appendChild(li);
+            });
+
+            if (canStudyList.innerHTML === "") {
+                canStudyList.innerHTML = `<li class="curriculum-item" style="color: var(--text-muted)">No tenés materias disponibles para cursar actualmente.</li>`;
+            }
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => menu.style.display = 'none');
+        });
+
+        initData();
+        renderPlan();
+        updateEngine();
+    </script>
+</body>
+</html>
